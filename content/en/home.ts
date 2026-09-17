@@ -60,27 +60,8 @@ export const home = {
   },
 
   join: {
-    kicker: "Join",
-    title: "How to join",
-    lead: "The club is open to every student at SMA Global Darussalam Academy. No prior experience is required.",
-    steps: [
-      {
-        id: "register",
-        title: "Register at the start of term",
-        body: "Registration opens at the start of the academic year. Mid-year entry is still possible with the advisor's approval.",
-      },
-      {
-        id: "choose",
-        title: "Pick one division",
-        body: "Choose the division that fits your interest. You can still join another division's project when it needs you.",
-      },
-      {
-        id: "build",
-        title: "Start at the Workbench",
-        body: "Come to the biweekly session, pitch an idea, then join a group that is already running.",
-      },
-    ],
-    note: "Questions? Find a club officer or the club advisor at school.",
+    line: "We are open.",
+    cta: "Open the registration form",
   },
 
   about: {

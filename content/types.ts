@@ -122,21 +122,11 @@ export interface ProjectsContent {
   items: ProjectContent[];
 }
 
-/** One step in the "how to join" sequence. */
-export interface JoinStepContent {
-  id: string;
-  title: string;
-  body: string;
-}
-
 export interface JoinContent {
-  kicker: string;
-  title: string;
-  lead: string;
-  steps: JoinStepContent[];
-  /** Closing line. Deliberately points at people, not an address — there is no
-   *  published club email yet. */
-  note: string;
+  /** The single line the section carries. */
+  line: string;
+  /** Label of the button that opens the registration form. */
+  cta: string;
 }
 
 /** A destination page in the 3D navigation hub. */

@@ -1,22 +1,22 @@
 import { getHome } from "@/content";
 import type { Locale } from "@/lib/i18n";
 import Reveal from "@/components/motion/Reveal";
-import SectionHeading from "@/components/ui/SectionHeading";
 
 /**
- * The closing section: how to join, and who to ask.
+ * The closing section: one line, and the door.
  *
- * `id="join"` gives the hero's "Join the club" CTA a real destination — it had
- * been pointing at nothing since the page was first assembled.
+ * It used to explain the three steps of joining (register, choose a division,
+ * start at the Workbench) and end with "find a club officer at school". All of
+ * that is gone: registration is handled by a Google Form, so anything the
+ * section said about *how* to join was a second, staler copy of the form's own
+ * questions. One line and one button is the whole job.
  *
- * Rendered as an `<ol>` because the steps are genuinely sequential (register,
- * then choose, then turn up), and it reuses the same rule / index / hover-lift
- * language as Programs and the About objectives.
- *
- * The closing line deliberately points at people rather than an address: the
- * club has no published email yet, and inventing one would be worse than saying
- * "ask at school".
+ * `id="join"` is kept — the hero's "Join the club" CTA and any older anchor
+ * link still land here.
  */
+const FORM_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLScDdQ9sgTB9ppZ4rEGNMncRH-ioNnXCF_Reky9T-BQDToB51w/viewform";
+
 export default function Join({ locale }: { locale: Locale }) {
   const { join } = getHome(locale);
 
@@ -24,30 +24,32 @@ export default function Join({ locale }: { locale: Locale }) {
     <section id="join" className="scroll-mt-[68px] bg-ink-950 py-24 md:py-28">
       <div className="mx-auto w-full max-w-[1180px] px-6">
         <Reveal>
-          <SectionHeading kicker={join.kicker} title={join.title} lead={join.lead} />
+          <h2 className="max-w-[660px] text-[clamp(1.7rem,3.6vw,2.5rem)] leading-[1.12] font-semibold tracking-[-0.02em] text-white">
+            {join.line}
+          </h2>
         </Reveal>
 
-        <ol className="mt-16 grid gap-x-10 gap-y-10 md:grid-cols-3">
-          {join.steps.map((step, index) => (
-            <Reveal key={step.id} as="li" delay={index * 80}>
-              <div className="lift-item">
-                <span className="draw-rule" aria-hidden="true" />
-                <span className="lift-index mt-5 block font-mono text-[11px] tracking-[0.1em] text-ink-500">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <h3 className="mt-3 mb-2 text-[1.15rem] font-semibold tracking-[-0.01em] text-white">
-                  {step.title}
-                </h3>
-                <p className="text-[14.5px] leading-[1.7] text-ink-300">{step.body}</p>
-              </div>
-            </Reveal>
-          ))}
-        </ol>
-
-        <Reveal delay={240}>
-          <p className="mt-14 border-t border-gold-500/12 pt-6 font-mono text-[12px] tracking-[0.06em] text-ink-400">
-            {join.note}
-          </p>
+        <Reveal delay={120}>
+          <a
+            href={FORM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-8 inline-flex items-center gap-2.5 rounded-lg bg-gold-500 px-[26px] py-[14px] text-sm font-semibold text-ink-950 transition-colors duration-[250ms] ease-brand hover:bg-gold-400"
+          >
+            {join.cta}
+            {/* The arrow says "this leaves the site" as much as it says "go" —
+                the form opens in a new tab. */}
+            <svg
+              viewBox="0 0 16 16"
+              className="h-[15px] w-[15px]"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              aria-hidden="true"
+            >
+              <path d="M3 8h10M9 4l4 4-4 4" />
+            </svg>
+          </a>
         </Reveal>
       </div>
     </section>

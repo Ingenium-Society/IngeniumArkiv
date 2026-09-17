@@ -60,27 +60,8 @@ export const home = {
   },
 
   join: {
-    kicker: "Gabung",
-    title: "Cara bergabung",
-    lead: "Klub ini terbuka untuk seluruh siswa SMA Global Darussalam Academy. Tidak ada syarat pengalaman sebelumnya.",
-    steps: [
-      {
-        id: "register",
-        title: "Daftar di awal semester",
-        body: "Pendaftaran dibuka di awal tahun ajaran. Masuk di tengah tahun tetap bisa dengan persetujuan pembina.",
-      },
-      {
-        id: "choose",
-        title: "Pilih satu divisi",
-        body: "Pilih divisi yang paling sesuai dengan minatmu. Kamu tetap bisa ikut proyek divisi lain bila proyeknya membutuhkan.",
-      },
-      {
-        id: "build",
-        title: "Mulai dari Workbench",
-        body: "Ikut sesi dua mingguan, ajukan ide proyek, lalu bergabung dengan kelompok yang sedang berjalan.",
-      },
-    ],
-    note: "Ada pertanyaan? Temui pengurus klub atau pembina di sekolah.",
+    line: "Pendaftaran dibuka.",
+    cta: "Buka formulir pendaftaran",
   },
 
   about: {
