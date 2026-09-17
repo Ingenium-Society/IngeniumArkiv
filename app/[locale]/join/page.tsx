@@ -22,7 +22,10 @@ export default async function JoinPage({
 
   return (
     <>
-      <PageIntro locale={locale} slug="join" />
+      {/* No lead line: the heading is the whole message on this page, and the
+          content file's one-liner is doing duty as the Gabung module subtitle
+          on the navigator. See PageIntro's `lead` prop. */}
+      <PageIntro locale={locale} slug="join" lead={null} />
       <Join locale={locale} />
     </>
   );

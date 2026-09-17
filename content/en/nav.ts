@@ -42,8 +42,11 @@ export const nav = {
       id: "join",
       slug: "join",
       label: "Join",
-      title: "How to join",
-      body: "How to sign up and what's expected.",
+      title: "Registration",
+      /* The page hides this line — see PageIntro's `lead` prop. It survives as
+         the subtitle under the Join module on the 3D navigator, so it has to
+         describe the page, not the three steps it used to list. */
+      body: "Registration through an online form.",
     },
   ],
 } satisfies NavHubContentSet;

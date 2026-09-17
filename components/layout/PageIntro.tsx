@@ -12,17 +12,26 @@ import { localePath, type Locale } from "@/lib/i18n";
  * hops or a refresh.
  *
  * `pt-[132px]` clears the 68px fixed header plus breathing room.
+ *
+ * `lead` overrides the content file's one-liner. Pass `null` to drop it
+ * entirely: on /join the heading *is* the message ("Pendaftaran"), and the
+ * body text there also has to double as the Gabung module's subtitle on the
+ * navigator, so the two cannot be the same string.
  */
 export default function PageIntro({
   locale,
   slug,
+  lead,
 }: {
   locale: Locale;
   slug: string;
+  lead?: string | null;
 }) {
   const { hub, pages } = getNav(locale);
   const page = pages.find((entry) => entry.slug === slug);
   if (!page) return null;
+
+  const text = lead === undefined ? page.body : lead;
 
   return (
     <header className="border-b border-gold-500/12 bg-ink-950 pt-[132px] pb-16">
@@ -47,9 +56,11 @@ export default function PageIntro({
         <h1 className="mb-4 text-[clamp(2rem,5vw,3.2rem)] leading-[1.08] font-semibold tracking-[-0.025em] text-white">
           {page.title}
         </h1>
-        <p className="max-w-[620px] text-[clamp(1rem,2vw,1.15rem)] text-ink-200">
-          {page.body}
-        </p>
+        {text ? (
+          <p className="max-w-[620px] text-[clamp(1rem,2vw,1.15rem)] text-ink-200">
+            {text}
+          </p>
+        ) : null}
       </div>
     </header>
   );

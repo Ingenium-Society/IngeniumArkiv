@@ -42,8 +42,11 @@ export const nav = {
       id: "join",
       slug: "join",
       label: "Gabung",
-      title: "Cara bergabung",
-      body: "Cara mendaftar dan apa yang diharapkan.",
+      title: "Pendaftaran",
+      /* The page hides this line — see PageIntro's `lead` prop. It survives as
+         the subtitle under the Gabung module on the 3D navigator, so it has to
+         describe the page, not the three steps it used to list. */
+      body: "Pendaftaran lewat formulir online.",
     },
   ],
 } satisfies NavHubContentSet;
