@@ -17,6 +17,19 @@ import Reveal from "@/components/motion/Reveal";
 const FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLScDdQ9sgTB9ppZ4rEGNMncRH-ioNnXCF_Reky9T-BQDToB51w/viewform";
 
+/**
+ * Who to write to. A constant rather than content, for the same reason as the
+ * form URL: these are the same in both locales. The last one is the club's own
+ * address — the three before it are individual officers, listed so that a
+ * question reaches a person rather than a shared inbox nobody owns.
+ */
+const CONTACTS = [
+  "rakha.alfarrasy@gdajogja.sch.id",
+  "haidar.nasirodin@gdajogja.sch.id",
+  "arya.rahadian@gdajogja.sch.id",
+  "societyingenium@gmail.com",
+];
+
 export default function Join({ locale }: { locale: Locale }) {
   const { join } = getHome(locale);
 
@@ -24,12 +37,19 @@ export default function Join({ locale }: { locale: Locale }) {
     <section id="join" className="scroll-mt-[68px] bg-ink-950 py-24 md:py-28">
       <div className="mx-auto w-full max-w-[1180px] px-6">
         <Reveal>
-          <h2 className="max-w-[660px] text-[clamp(1.7rem,3.6vw,2.5rem)] leading-[1.12] font-semibold tracking-[-0.02em] text-white">
+          <h2 className="mx-auto max-w-[660px] text-[clamp(1.7rem,3.6vw,2.5rem)] leading-[1.12] font-semibold tracking-[-0.02em] text-white">
             {join.line}
           </h2>
         </Reveal>
 
-        <Reveal delay={120}>
+        {/* The one ask on the page. Tinted with the BioTech division's own
+            accent, so it reads as a division notice rather than a second
+            headline — see `--color-div-bt` in the design tokens. */}
+        <Reveal delay={100}>
+          <p className="join-focus mx-auto mt-8 max-w-[620px]">{join.focus}</p>
+        </Reveal>
+
+        <Reveal delay={160}>
           <a
             href={FORM_URL}
             target="_blank"
@@ -50,6 +70,21 @@ export default function Join({ locale }: { locale: Locale }) {
               <path d="M3 8h10M9 4l4 4-4 4" />
             </svg>
           </a>
+        </Reveal>
+
+        <Reveal delay={220}>
+          <div className="join-contacts">
+            <span className="join-contacts__label">{join.contactLabel}</span>
+            <ul className="join-contacts__list">
+              {CONTACTS.map((email) => (
+                <li key={email}>
+                  <a href={`mailto:${email}`} className="join-contacts__link">
+                    {email}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </Reveal>
       </div>
     </section>

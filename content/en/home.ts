@@ -61,6 +61,9 @@ export const home = {
 
   join: {
     line: "We are open.",
+    focus:
+      "We are especially looking for members for the BioTech division. If you are drawn to biology, health, or lab work, that is where we need you.",
+    contactLabel: "Questions? Get in touch:",
     cta: "Open the registration form",
   },
 

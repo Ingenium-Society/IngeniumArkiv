@@ -27,6 +27,15 @@ export interface SiteContent {
    * development, not a section of it.
    */
   wip: string;
+  /** The 404 page. */
+  notFound: {
+    /** Large numeral or short label — "404". */
+    code: string;
+    title: string;
+    body: string;
+    /** Label of the link back to the navigator. */
+    cta: string;
+  };
 }
 
 export interface HeroContent {
@@ -131,6 +140,10 @@ export interface ProjectsContent {
 export interface JoinContent {
   /** The single line the section carries. */
   line: string;
+  /** What the club is short of — the one ask on the page. */
+  focus: string;
+  /** Label above the contact list. */
+  contactLabel: string;
   /** Label of the button that opens the registration form. */
   cta: string;
 }

@@ -22,9 +22,12 @@ export default async function HomePage({
   if (!isLocale(locale)) notFound();
 
   return (
-    <>
+    /* The page-identity wrapper every route gets from its own template — the
+       home page is not a template because it is the layout's default child, so
+       it carries the class directly. See "Page identity" in globals.css. */
+    <div className="page page--home">
       <Hero locale={locale} />
       <NavMachine locale={locale} />
-    </>
+    </div>
   );
 }

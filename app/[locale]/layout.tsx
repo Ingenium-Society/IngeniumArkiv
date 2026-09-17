@@ -4,6 +4,7 @@ import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import Header from "@/components/layout/Header";
 import ScrollProgress from "@/components/layout/ScrollProgress";
 import IntroDoors from "@/components/motion/IntroDoors";
+import PageTransition from "@/components/motion/PageTransition";
 import { getSite } from "@/content";
 import { isLocale, locales } from "@/lib/i18n";
 import "../globals.css";
@@ -117,6 +118,10 @@ export default async function LocaleLayout({
         <ScrollProgress />
         <Header locale={locale} />
         <main>{children}</main>
+        {/* Inside the layout, not a page: it has to survive the route change to
+            animate across it. Keyed by pathname so each arrival replays its
+            own sweep — see components/motion/PageTransition.tsx. */}
+        <PageTransition />
       </body>
     </html>
   );

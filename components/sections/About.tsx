@@ -23,7 +23,11 @@ export default function About({ locale }: { locale: Locale }) {
     >
       <div className="mx-auto w-full max-w-[1180px] px-6">
         <div className="grid gap-10 md:grid-cols-[minmax(0,320px)_minmax(0,1fr)] md:gap-16">
-          <Reveal>
+          {/* The title rides along while the paragraphs scroll past it — the
+              layout signature of this page. `self-start` is load-bearing: a
+              grid item stretches to the row height by default, and a stretched
+              sticky element has no room to travel. */}
+          <Reveal className="md:sticky md:top-[104px] md:self-start">
             <span className="text-shimmer mb-4 block font-mono text-[11px] tracking-[0.2em] uppercase">
               {about.kicker}
             </span>
@@ -32,7 +36,7 @@ export default function About({ locale }: { locale: Locale }) {
             </h2>
           </Reveal>
 
-          <div className="max-w-[620px] space-y-5">
+          <div className="max-w-[620px] space-y-5 md:border-l md:border-gold-500/12 md:pl-12">
             {about.paragraphs.map((paragraph, index) => (
               <Reveal key={paragraph.slice(0, 24)} delay={index * 80}>
                 <p className="leading-[1.78] text-ink-300">{paragraph}</p>

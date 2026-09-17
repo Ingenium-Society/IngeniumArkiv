@@ -14,4 +14,10 @@ export const site = {
       "The engineering club of SMA Global Darussalam Academy. We turn real problems around us into solutions designed, built, and tested by students.",
   },
   wip: "In development",
+  notFound: {
+    code: "404",
+    title: "Page not found",
+    body: "That address isn't here. It may be a typo, or the page may have moved.",
+    cta: "Back to the navigator",
+  },
 } satisfies SiteContent;

@@ -61,6 +61,9 @@ export const home = {
 
   join: {
     line: "Pendaftaran dibuka.",
+    focus:
+      "Kami sedang mencari anggota untuk Divisi BioTech. Kalau kamu tertarik pada biologi, kesehatan, atau riset di laboratorium, di sinilah tempatnya.",
+    contactLabel: "Ada pertanyaan? Hubungi kami:",
     cta: "Buka formulir pendaftaran",
   },
 

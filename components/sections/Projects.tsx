@@ -70,17 +70,23 @@ export default function Projects({ locale }: { locale: Locale }) {
           <SectionHeading kicker={head.kicker} title={head.title} lead={head.lead} />
         </Reveal>
 
-        <ul className="mt-16 grid gap-6 md:grid-cols-2">
+        {/* Full-width case rows with the artwork alternating sides, rather than
+            a card grid: the projects page reads as a list of builds in flight,
+            which is also what gives it a silhouette no other page has. */}
+        <ul className="mt-16 space-y-8">
           {items.map((project, index) => {
             const accent = accentFor(project.divisionId);
+            const flip = index % 2 === 1;
             return (
               <Reveal key={project.slug} as="li" delay={index * 80}>
-                <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-gold-500/13 bg-ink-800 transition duration-300 ease-brand hover:-translate-y-1 hover:border-gold-500/30">
-                  <div className="h-[170px] shrink-0 bg-ink-700">
+                <article className="grid overflow-hidden rounded-2xl border border-gold-500/13 bg-ink-800 transition duration-300 ease-brand hover:border-gold-500/30 md:grid-cols-2">
+                  <div
+                    className={`h-[190px] bg-ink-700 md:h-full md:min-h-[280px] ${flip ? "md:order-2" : ""}`}
+                  >
                     <ProjectArt slug={project.slug} accent={accent} />
                   </div>
 
-                  <div className="flex flex-1 flex-col p-7">
+                  <div className="flex flex-col p-7 md:p-9">
                     <div className="mb-4 flex flex-wrap items-center gap-2">
                       <span
                         className="rounded-full border px-2.5 py-1 font-mono text-[10.5px] tracking-[0.1em] uppercase"

@@ -1022,6 +1022,689 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
+   Page transitions — one sweep per destination
+
+   Mounted once in the locale layout (components/motion/PageTransition.tsx) and
+   keyed by pathname, so every navigation replays it. Six variants, one per
+   route: a transition that looks identical everywhere stops reading as a
+   transition and starts reading as a flicker.
+
+   The layer is `pointer-events: none` and ends at `visibility: hidden` — it
+   must never intercept a click, and it must never be left sitting over a page.
+   `z-index: 120` puts it over the header (90) so the sweep reads as a whole
+   viewport change, but under the door intro (200), which owns the first load.
+--------------------------------------------------------------------------- */
+.page-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  pointer-events: none;
+  overflow: hidden;
+  /* Inert until armed: the first load belongs to the door intro, so nothing
+     here may paint until a navigation has actually happened. */
+  visibility: hidden;
+}
+/* Armed = a route change has occurred. The sweep then runs, and `pt-retire`
+   flips the layer back to hidden so it can never be left over a page. 900ms is
+   the slowest variant plus margin: Programmes' third bar runs to 760ms. */
+.page-transition[data-armed="on"] {
+  visibility: visible;
+  animation: pt-retire 0.001ms linear 0.9s forwards;
+}
+@keyframes pt-retire {
+  to {
+    visibility: hidden;
+  }
+}
+
+.page-transition__panel {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--color-ink-900), var(--color-ink-950));
+}
+
+.page-transition__edge {
+  position: absolute;
+  background: var(--color-gold-500);
+  box-shadow: 0 0 26px 4px rgba(184, 169, 93, 0.42);
+}
+
+/* home — a wipe from the top down */
+.page-transition[data-armed="on"][data-variant="home"] .page-transition__panel {
+  animation: pt-wipe-down 0.62s var(--ease-brand) both;
+}
+@keyframes pt-wipe-down {
+  from {
+    transform: translateY(-101%);
+  }
+  to {
+    transform: translateY(101%);
+  }
+}
+.page-transition[data-armed="on"][data-variant="home"] .page-transition__edge {
+  left: 0;
+  right: 0;
+  height: 2px;
+  animation: pt-edge-down 0.62s var(--ease-brand) both;
+}
+@keyframes pt-edge-down {
+  0% {
+    top: -2px;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/* about — a wipe across, left to right */
+.page-transition[data-armed="on"][data-variant="about"] .page-transition__panel {
+  animation: pt-wipe-right 0.62s var(--ease-brand) both;
+}
+@keyframes pt-wipe-right {
+  from {
+    transform: translateX(-101%);
+  }
+  to {
+    transform: translateX(101%);
+  }
+}
+.page-transition[data-armed="on"][data-variant="about"] .page-transition__edge {
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  animation: pt-edge-right 0.62s var(--ease-brand) both;
+}
+@keyframes pt-edge-right {
+  0% {
+    left: -2px;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+/* programs — three stacked bars, sweeping in turn */
+.page-transition[data-armed="on"][data-variant="programs"] .page-transition__panel,
+.page-transition[data-armed="on"][data-variant="programs"] .page-transition__panel::before,
+.page-transition[data-armed="on"][data-variant="programs"] .page-transition__panel::after {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 33.4%;
+  background: linear-gradient(90deg, var(--color-ink-900), var(--color-ink-950));
+}
+.page-transition[data-armed="on"][data-variant="programs"] .page-transition__panel {
+  top: 0;
+  animation: pt-bar 0.6s var(--ease-brand) both;
+}
+.page-transition[data-armed="on"][data-variant="programs"] .page-transition__panel::before,
+.page-transition[data-armed="on"][data-variant="programs"] .page-transition__panel::after {
+  content: "";
+  animation: pt-bar 0.6s var(--ease-brand) both;
+}
+.page-transition[data-armed="on"][data-variant="programs"] .page-transition__panel::before {
+  top: 100%;
+  animation-delay: 80ms;
+}
+.page-transition[data-armed="on"][data-variant="programs"] .page-transition__panel::after {
+  top: 200%;
+  animation-delay: 160ms;
+}
+@keyframes pt-bar {
+  0% {
+    transform: translateX(-101%);
+  }
+  50% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(101%);
+  }
+}
+.page-transition[data-armed="on"][data-variant="programs"] .page-transition__edge {
+  display: none;
+}
+
+/* divisions — an iris that closes and opens again */
+.page-transition[data-armed="on"][data-variant="divisions"] .page-transition__panel {
+  background: radial-gradient(circle at 50% 50%, var(--color-ink-900), var(--color-ink-950) 70%);
+  animation: pt-iris 0.7s var(--ease-brand) both;
+}
+@keyframes pt-iris {
+  0% {
+    clip-path: circle(0% at 50% 50%);
+  }
+  48% {
+    clip-path: circle(78% at 50% 50%);
+  }
+  100% {
+    clip-path: circle(0% at 50% 50%);
+  }
+}
+.page-transition[data-armed="on"][data-variant="divisions"] .page-transition__edge {
+  left: 50%;
+  top: 50%;
+  width: 34vmax;
+  height: 34vmax;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: none;
+  border: 1px solid rgba(184, 169, 93, 0.55);
+  animation: pt-iris-ring 0.7s var(--ease-brand) both;
+}
+@keyframes pt-iris-ring {
+  0% {
+    scale: 0.1;
+    opacity: 0;
+  }
+  48% {
+    scale: 1;
+    opacity: 0.85;
+  }
+  100% {
+    scale: 2.2;
+    opacity: 0;
+  }
+}
+
+/* projects — a scanline band travelling down the viewport */
+.page-transition[data-armed="on"][data-variant="projects"] .page-transition__panel {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(18, 22, 43, 0.82) 16%,
+    rgba(11, 14, 28, 0.96) 50%,
+    rgba(18, 22, 43, 0.82) 84%,
+    transparent 100%
+  );
+  animation: pt-scan 0.66s var(--ease-brand) both;
+}
+@keyframes pt-scan {
+  from {
+    transform: translateY(-58%);
+  }
+  to {
+    transform: translateY(58%);
+  }
+}
+.page-transition[data-armed="on"][data-variant="projects"] .page-transition__edge {
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-gold-300), transparent);
+  animation: pt-scan-line 0.66s var(--ease-brand) both;
+}
+@keyframes pt-scan-line {
+  0% {
+    top: 0;
+    opacity: 0;
+  }
+  14% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/* join — a curtain that parts from the centre, echoing the door intro */
+.page-transition[data-armed="on"][data-variant="join"] .page-transition__panel {
+  animation: pt-curtain 0.66s var(--ease-brand) both;
+}
+@keyframes pt-curtain {
+  0% {
+    clip-path: inset(0 50% 0 50%);
+  }
+  50% {
+    clip-path: inset(0 0 0 0);
+  }
+  100% {
+    clip-path: inset(0 50% 0 50%);
+  }
+}
+.page-transition[data-armed="on"][data-variant="join"] .page-transition__edge {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  animation: pt-curtain-seam 0.66s var(--ease-brand) both;
+}
+@keyframes pt-curtain-seam {
+  0% {
+    opacity: 0;
+    scale: 1 0.15;
+  }
+  48% {
+    opacity: 1;
+    scale: 1 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1 1;
+  }
+}
+
+/* lost — the 404. A glitch: the panel arrives in hard steps rather than a
+   smooth wipe, which is the one transition that should feel wrong. */
+.page-transition[data-armed="on"][data-variant="lost"] .page-transition__panel {
+  animation: pt-glitch 0.7s steps(1, end) both;
+}
+@keyframes pt-glitch {
+  0% {
+    clip-path: inset(0 0 100% 0);
+  }
+  22% {
+    clip-path: inset(38% 0 24% 0);
+  }
+  44% {
+    clip-path: inset(8% 0 62% 0);
+  }
+  66% {
+    clip-path: inset(54% 0 0 0);
+  }
+  100% {
+    clip-path: inset(0 0 100% 0);
+  }
+}
+.page-transition[data-armed="on"][data-variant="lost"] .page-transition__edge {
+  left: 0;
+  right: 0;
+  height: 2px;
+  animation: pt-glitch-line 0.7s steps(1, end) both;
+}
+@keyframes pt-glitch-line {
+  0% {
+    top: 0;
+    opacity: 0;
+  }
+  22% {
+    top: 38%;
+    opacity: 1;
+  }
+  44% {
+    top: 8%;
+    opacity: 1;
+  }
+  66% {
+    top: 54%;
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Page identity — one motif, one intro, one rhythm per route
+
+   Each route's `template.tsx` wraps its content in `.page--<route>`, and that
+   single class carries the page's whole personality: the background motif
+   behind it, the intro animation it plays on arrival, and its own spacing and
+   container rules. The tokens, type scale and primitives (`Reveal`, `.lift-item`,
+   `.draw-rule`) are shared, which is what keeps five different pages reading as
+   one site.
+
+   Sections inside a page are made transparent so the motif sits *behind* the
+   content instead of over it — a texture on top of body text costs legibility
+   and buys nothing. `.page > section` (0,1,1) outranks Tailwind's `.bg-ink-900`
+   (0,1,0), so no `!important` is needed.
+--------------------------------------------------------------------------- */
+.page {
+  position: relative;
+  background-color: var(--color-ink-950);
+  background-repeat: repeat;
+}
+.page > section,
+.page > header {
+  background-color: transparent;
+}
+
+/* Home carries no motif, and no wrapper animation either: the wrapper is an
+   ancestor of the `preserve-3d` machine, and this project has twice been bitten
+   by a grouping property on an ancestor of a 3D context. The doors and the
+   machine's own anime.js entrance already own this moment, so the page's
+   flourish is a rule that sweeps across the top — a pseudo-element, which
+   animates nothing in the subtree. */
+.page--home::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--color-gold-500), transparent);
+  transform-origin: center;
+  animation: page-home-rule 1.2s var(--ease-brand) 200ms both;
+}
+@keyframes page-home-rule {
+  0% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+/* about — a blueprint grid, and a title rule that draws itself */
+.page--about {
+  background-image:
+    linear-gradient(to right, rgba(184, 169, 93, 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(184, 169, 93, 0.055) 1px, transparent 1px),
+    radial-gradient(120% 60% at 50% 0%, rgba(35, 40, 72, 0.55), transparent 70%);
+  background-size: 72px 72px, 72px 72px, 100% 100%;
+  animation: page-about-in 0.7s var(--ease-brand) both;
+}
+@keyframes page-about-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* The rule under the page title, drawn left to right as the page settles. */
+.page--about header h1 {
+  position: relative;
+  padding-bottom: 18px;
+}
+.page--about header h1::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--color-gold-500), transparent);
+  transform-origin: left center;
+  animation: page-rule-draw 0.9s var(--ease-brand) 0.25s both;
+}
+@keyframes page-rule-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* programs — a ledger: ruled lines, and content entering from the left */
+.page--programs {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(184, 169, 93, 0.05) 0 1px,
+    transparent 1px 64px
+  );
+  animation: page-programs-in 0.66s var(--ease-brand) both;
+}
+@keyframes page-programs-in {
+  from {
+    opacity: 0;
+    transform: translateX(-34px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* An accent bar beside the page title — the ledger's left margin. */
+.page--programs header h1 {
+  border-left: 2px solid var(--color-gold-500);
+  padding-left: 18px;
+  margin-left: -20px;
+}
+.page--programs section {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+/* divisions — a dotted field, arriving on a slow settle */
+.page--divisions {
+  background-image: radial-gradient(rgba(184, 169, 93, 0.11) 1px, transparent 1px);
+  background-size: 26px 26px;
+  animation: page-divisions-in 0.78s var(--ease-brand) both;
+}
+@keyframes page-divisions-in {
+  from {
+    opacity: 0;
+    transform: scale(1.022);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Wider gutters than the other pages: the division cards are a grid, and the
+   dotted field reads as a board rather than a background. */
+.page--divisions > section > div,
+.page--divisions > header > div {
+  max-width: 1280px;
+}
+.page--divisions header h1 {
+  letter-spacing: -0.035em;
+}
+
+/* A division card: a framed panel with the division's accent as a spine, and
+   its number set large and faint in the corner. The accent arrives as
+   `--accent` from the component, alongside the `--rule` values the shared
+   hover treatment already uses. */
+.division-card {
+  position: relative;
+  overflow: hidden;
+  padding: 1.6rem 1.6rem 1.75rem;
+  border: 1px solid rgba(184, 169, 93, 0.12);
+  border-left: 3px solid var(--accent, var(--color-gold-500));
+  border-radius: 14px;
+  background-color: rgba(18, 22, 43, 0.5);
+}
+.division-card__numeral {
+  position: absolute;
+  top: 0.85rem;
+  right: 1.15rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 3.4rem;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: rgba(184, 169, 93, 0.1);
+  transition: color 0.35s var(--ease-brand);
+}
+.division-card:hover .division-card__numeral {
+  color: rgba(184, 169, 93, 0.22);
+}
+
+/* projects — a hatched field, revealed by a downward clip */
+.page--projects {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(184, 169, 93, 0.042) 0 1px,
+    transparent 1px 15px
+  );
+  animation: page-projects-in 0.72s var(--ease-brand) both;
+}
+@keyframes page-projects-in {
+  from {
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+}
+.page--projects header h1::before {
+  content: "//";
+  margin-right: 12px;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.42em;
+  color: var(--color-gold-500);
+  vertical-align: 0.45em;
+  letter-spacing: 0.1em;
+}
+
+/* lost — the 404. Horizontal scanline static, and the only intro in the set
+   that arrives by flickering into focus rather than moving into place: a page
+   that does not exist should not glide in confidently. */
+.page--lost {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(184, 169, 93, 0.035) 0 2px,
+    transparent 2px 5px
+  );
+  animation: page-lost-in 0.9s var(--ease-brand) both;
+}
+@keyframes page-lost-in {
+  0% {
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.45;
+  }
+  30% {
+    opacity: 0.12;
+  }
+  46% {
+    opacity: 0.7;
+  }
+  58% {
+    opacity: 0.35;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+/* The numeral sits behind the text as a watermark. Set large and very faint so
+   the sentence is read first. */
+.page-lost__code {
+  display: block;
+  font-family: var(--font-mono), monospace;
+  font-size: clamp(4.5rem, 12vw, 8.5rem);
+  line-height: 0.85;
+  letter-spacing: -0.05em;
+  color: rgba(184, 169, 93, 0.14);
+  animation: page-lost-code 1.4s var(--ease-brand) 120ms both;
+}
+@keyframes page-lost-code {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* join — no motif, a single glow, and content centred on a narrow column.
+   The page's identity is emptiness: one line and one button. */
+.page--join {
+  background-image: radial-gradient(
+    62% 46% at 50% 18%,
+    rgba(184, 169, 93, 0.11),
+    transparent 72%
+  );
+  background-size: 100% 100%;
+  animation: page-join-in 0.8s var(--ease-brand) both;
+}
+@keyframes page-join-in {
+  from {
+    opacity: 0;
+    transform: scale(0.972);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.page--join header,
+.page--join #join {
+  text-align: center;
+}
+.page--join header > div,
+.page--join #join > div {
+  max-width: 720px;
+}
+.page--join header a {
+  justify-content: center;
+}
+.page--join header p {
+  margin-left: auto;
+  margin-right: auto;
+}
+.page--join #join a {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* The BioTech ask, tinted with that division's own accent (`--color-div-bt`)
+   so it reads as a division notice and not as a second headline. */
+.join-focus {
+  padding: 1.1rem 1.4rem;
+  border: 1px solid rgba(79, 191, 159, 0.32);
+  border-radius: 12px;
+  background-color: rgba(79, 191, 159, 0.06);
+  color: var(--color-ink-200);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+/* Contacts, under a rule. Centred to match the rest of this page. */
+.join-contacts {
+  max-width: 620px;
+  margin: 3.5rem auto 0;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(184, 169, 93, 0.14);
+}
+.join-contacts__label {
+  display: block;
+  margin-bottom: 0.9rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-gold-500);
+}
+.join-contacts__list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.45rem 1.5rem;
+}
+.join-contacts__link {
+  font-family: var(--font-mono), monospace;
+  font-size: 12.5px;
+  color: var(--color-ink-300);
+  border-bottom: 1px solid transparent;
+  transition:
+    color 0.25s var(--ease-brand),
+    border-color 0.25s var(--ease-brand);
+}
+.join-contacts__link:hover,
+.join-contacts__link:focus-visible {
+  color: var(--color-gold-300);
+  border-bottom-color: rgba(184, 169, 93, 0.45);
+}
+
+/* ---------------------------------------------------------------------------
    Reduced motion — kill every transform animation, keep the end state
 --------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
@@ -1042,6 +1725,23 @@ body {
   }
   .intro {
     display: none;
+  }
+  /* Same reasoning: the sweep is pure decoration, and a 0.001ms version of it
+     would still flash a full-viewport panel over the arriving page. */
+  .page-transition {
+    display: none;
+  }
+  /* The per-page intros are transform/opacity only, so the global rule above
+     lands them on their end state. The two clip-path reveals need the property
+     cleared rather than animated, or `inset(0 0 100% 0)` would hide the page. */
+  .page--projects {
+    clip-path: none;
+  }
+  .page--divisions,
+  .page--join,
+  .page--about,
+  .page--programs {
+    transform: none;
   }
   .hero-stagger {
     opacity: 1;

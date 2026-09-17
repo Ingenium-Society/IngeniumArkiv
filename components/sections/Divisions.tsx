@@ -33,25 +33,30 @@ export default function Divisions({ locale }: { locale: Locale }) {
           <SectionHeading kicker={head.kicker} title={head.title} lead={head.lead} />
         </Reveal>
 
-        <ul className="mt-16 grid gap-x-10 gap-y-10 md:grid-cols-2">
+        {/* A board of framed cards rather than rule-topped items: each division
+            gets a panel, a thick accent spine, and a ghost numeral. The accent
+            still arrives as `--rule` / `--rule-hover` so the shared hover
+            brightening keeps working. */}
+        <ul className="mt-16 grid gap-6 md:grid-cols-2">
           {items.map((division, index) => {
             const accent = accentFor(division.id);
             return (
               <Reveal key={division.id} as="li" delay={index * 70}>
                 <div
-                  className="lift-item"
+                  className="lift-item division-card"
                   style={
                     {
                       "--rule": `${accent}2e`,
                       "--rule-hover": `${accent}99`,
+                      "--accent": accent,
                     } as CSSProperties
                   }
                 >
                   <span className="draw-rule" aria-hidden="true" />
-                  <span className="lift-index mt-5 block font-mono text-[11px] tracking-[0.1em] text-ink-500">
+                  <span className="lift-index division-card__numeral" aria-hidden="true">
                     {String(index + 1).padStart(2, "0")}
                   </span>
-                  <h3 className="mt-3 mb-2 text-[1.15rem] font-semibold tracking-[-0.01em] text-white">
+                  <h3 className="mt-5 mb-2 text-[1.15rem] font-semibold tracking-[-0.01em] text-white">
                     {division.name}
                   </h3>
                   <span
