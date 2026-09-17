@@ -1667,6 +1667,30 @@ body {
   line-height: 1.7;
 }
 
+/* The closing date. A pill rather than another paragraph: it has to be the
+   thing the eye catches on the way to the button. */
+.join-deadline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 0.95rem;
+  border: 1px solid rgba(184, 169, 93, 0.35);
+  border-radius: 999px;
+  background-color: rgba(184, 169, 93, 0.08);
+}
+.join-deadline__label {
+  font-family: var(--font-mono), monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-gold-500);
+}
+.join-deadline__value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-ink-100);
+}
+
 /* Contacts, under a rule. Centred to match the rest of this page. */
 .join-contacts {
   max-width: 620px;

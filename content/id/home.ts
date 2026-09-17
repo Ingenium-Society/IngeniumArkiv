@@ -63,6 +63,8 @@ export const home = {
     line: "Pendaftaran dibuka.",
     focus:
       "Kami sedang mencari anggota untuk Divisi BioTech. Kalau kamu tertarik pada biologi, kesehatan, atau riset di laboratorium, di sinilah tempatnya.",
+    deadlineLabel: "Tenggat",
+    deadline: "Jumat, 18 September 2026, pukul 07.00",
     contactLabel: "Ada pertanyaan? Hubungi kami:",
     cta: "Buka formulir pendaftaran",
   },

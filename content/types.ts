@@ -142,6 +142,10 @@ export interface JoinContent {
   line: string;
   /** What the club is short of — the one ask on the page. */
   focus: string;
+  /** Label of the closing date, e.g. "Deadline". */
+  deadlineLabel: string;
+  /** The closing date itself. */
+  deadline: string;
   /** Label above the contact list. */
   contactLabel: string;
   /** Label of the button that opens the registration form. */

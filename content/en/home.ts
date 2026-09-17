@@ -63,6 +63,8 @@ export const home = {
     line: "We are open.",
     focus:
       "We are especially looking for members for the BioTech division. If you are drawn to biology, health, or lab work, that is where we need you.",
+    deadlineLabel: "Deadline",
+    deadline: "Friday 18 September 2026, 7:00 AM",
     contactLabel: "Questions? Get in touch:",
     cta: "Open the registration form",
   },
