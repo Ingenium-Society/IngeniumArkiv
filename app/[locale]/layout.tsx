@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import Header from "@/components/layout/Header";
 import ScrollProgress from "@/components/layout/ScrollProgress";
+import IntroDoors from "@/components/motion/IntroDoors";
 import { getSite } from "@/content";
 import { isLocale, locales } from "@/lib/i18n";
 import "../globals.css";
@@ -106,6 +107,13 @@ export default async function LocaleLayout({
               "<style>.reveal{opacity:1 !important;transform:none !important}.draw-rule{transform:none !important}</style>",
           }}
         />
+        {/* The door intro. It lives here rather than on the home page because
+            it is a *site* entrance: the panels, the seam and the flash are all
+            plain CSS in globals.css, and `intro-seen` (set above) retires them
+            after the first visit in a tab. Without this line the component was
+            dead code — every style and keyframe for it existed, nothing
+            rendered it, and the hero waited 600ms for doors that never came. */}
+        <IntroDoors />
         <ScrollProgress />
         <Header locale={locale} />
         <main>{children}</main>

@@ -41,9 +41,13 @@ import {
  *     `TURNTABLE_PERIOD`. Dragging takes over immediately and the turntable
  *     resumes a few seconds after the pointer is released. Under reduced motion
  *     there is no turntable, and dragging snaps instead of easing.
- *   - **Fine pointers only.** Touch drags would fight page scrolling, and the
- *     scene is hidden below `lg` anyway, so nothing depends on a gesture a phone
- *     cannot perform.
+ *   - **Any pointer, including touch.** Dragging used to be attached only when
+ *     `(pointer: fine)` matched, which left the machine un-orbitable on any
+ *     device whose *primary* pointer is coarse — a tablet, or a touchscreen
+ *     laptop. The turntable still turned, so it read as "it won't change angle"
+ *     rather than "it is frozen". `touch-action: pan-y` on the scene is what
+ *     keeps this from fighting the page: the browser claims the vertical axis
+ *     for scrolling and fires `pointercancel`, which is already handled below.
  */
 const LERP = 0.09;
 const TURNTABLE_PERIOD = 150_000; // ms per revolution
@@ -83,7 +87,6 @@ export default function MachineOrbit() {
     if (!root || !scene || !stage || !svg) return;
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const fine = window.matchMedia("(pointer: fine)").matches;
     const ease = reduced ? 1 : LERP;
 
     const units = Array.from(
@@ -231,7 +234,7 @@ export default function MachineOrbit() {
     };
 
     const onDown = (event: PointerEvent) => {
-      if (!fine || event.button !== 0) return;
+      if (event.button !== 0) return;
       /* The labels sit over the scene and are the real navigation — a press that
          starts on one is a click, not the start of an orbit. */
       if ((event.target as HTMLElement | null)?.closest(".machine__hotspots")) {
@@ -281,12 +284,11 @@ export default function MachineOrbit() {
     /* The labels are positioned in pixels, so a resize has to re-project them. */
     const onResize = () => draw();
 
-    if (fine) {
-      scene.addEventListener("pointerdown", onDown);
-      scene.addEventListener("pointermove", onMove);
-      scene.addEventListener("pointerup", onUp);
-      scene.addEventListener("pointercancel", onUp);
-    }
+    /* Attached for every pointer type — see the note at the top of the file. */
+    scene.addEventListener("pointerdown", onDown);
+    scene.addEventListener("pointermove", onMove);
+    scene.addEventListener("pointerup", onUp);
+    scene.addEventListener("pointercancel", onUp);
     window.addEventListener("resize", onResize);
 
     draw();
@@ -294,12 +296,10 @@ export default function MachineOrbit() {
 
     return () => {
       io.disconnect();
-      if (fine) {
-        scene.removeEventListener("pointerdown", onDown);
-        scene.removeEventListener("pointermove", onMove);
-        scene.removeEventListener("pointerup", onUp);
-        scene.removeEventListener("pointercancel", onUp);
-      }
+      scene.removeEventListener("pointerdown", onDown);
+      scene.removeEventListener("pointermove", onMove);
+      scene.removeEventListener("pointerup", onUp);
+      scene.removeEventListener("pointercancel", onUp);
       window.removeEventListener("resize", onResize);
       if (frame) cancelAnimationFrame(frame);
       svg.replaceChildren();
