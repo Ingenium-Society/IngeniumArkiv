@@ -13,4 +13,5 @@ export const site = {
     description:
       "Klub teknik SMA Global Darussalam Academy. Kami mengubah masalah nyata di sekitar kami menjadi solusi yang dirancang, dibangun, dan diuji sendiri oleh siswa.",
   },
+  wip: "Dalam pengembangan",
 } satisfies SiteContent;

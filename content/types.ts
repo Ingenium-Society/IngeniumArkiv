@@ -21,6 +21,12 @@ export interface SiteContent {
     title: string;
     description: string;
   };
+  /**
+   * Short marker shown in the header while the site is unfinished. Deliberately
+   * a site-level string rather than a per-page one: the whole site is in
+   * development, not a section of it.
+   */
+  wip: string;
 }
 
 export interface HeroContent {

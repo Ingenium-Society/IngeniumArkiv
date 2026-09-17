@@ -13,4 +13,5 @@ export const site = {
     description:
       "The engineering club of SMA Global Darussalam Academy. We turn real problems around us into solutions designed, built, and tested by students.",
   },
+  wip: "In development",
 } satisfies SiteContent;
