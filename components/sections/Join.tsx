@@ -27,6 +27,7 @@ const CONTACTS = [
   "rakha.alfarrasy@gdajogja.sch.id",
   "haidar.nasirodin@gdajogja.sch.id",
   "arya.rahadian@gdajogja.sch.id",
+  "rauf.akmal@gdajogja.sch.id",
   "societyingenium@gmail.com",
 ];
 

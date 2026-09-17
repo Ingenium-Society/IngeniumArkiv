@@ -1,7 +1,5 @@
-"use client";
-
+import { headers } from "next/headers";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { getSite } from "@/content";
 import { defaultLocale, isLocale, localePath } from "@/lib/i18n";
 
@@ -14,18 +12,21 @@ import { defaultLocale, isLocale, localePath } from "@/lib/i18n";
  * (the layout wraps it), carries its own `.page--lost` identity and intro, and
  * offers the one useful action: back to the navigator.
  *
- * A **client** component for one reason: `not-found.tsx` is not handed the
- * route params, so the locale cannot be read from props. `usePathname()` gives
- * it directly, and the component is still server-rendered on first paint.
+ * Reached via `app/[locale]/[...rest]/page.tsx`, which matches an unmatched
+ * path into the locale segment and calls `notFound()`. Without that catch-all
+ * this file would never run: an unmatched URL is resolved against the *root*
+ * not-found, and the only layout that imports globals.css lives under
+ * `[locale]`, so a root 404 would render with no stylesheet at all.
  *
- * The middleware sends every locale-less path into the default locale, so
- * `/anything` arrives here as `/id/anything` — this catches typos at the root
- * as well as inside a locale.
+ * A **server** component reading the locale from the `x-locale` header the
+ * middleware sets: `not-found.tsx` is not handed route params, and an earlier
+ * version that used `usePathname()` in a client component rendered Next's error
+ * boundary instead of this page.
  */
-export default function NotFound() {
-  const pathname = usePathname();
-  const first = pathname.split("/").filter(Boolean)[0] ?? "";
-  const locale = isLocale(first) ? first : defaultLocale;
+export default async function NotFound() {
+  const requestHeaders = await headers();
+  const raw = requestHeaders.get("x-locale") ?? defaultLocale;
+  const locale = isLocale(raw) ? raw : defaultLocale;
   const { notFound } = getSite(locale);
 
   return (
