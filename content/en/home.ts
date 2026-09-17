@@ -12,7 +12,7 @@ export const home = {
   },
 
   stats: [
-    { id: "members", value: 23, label: "Active members" },
+    { id: "members", value: 28, label: "Active members" },
     { id: "divisions", value: 4, label: "Engineering divisions" },
     { id: "projects", value: 2, label: "Kickoff projects" },
     { id: "founded", value: 2026, from: 2000, label: "Founded" },
