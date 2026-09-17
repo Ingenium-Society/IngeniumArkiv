@@ -1,0 +1,1095 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Design tokens.
+   Colours sampled from the club logo by cluster analysis — see
+   docs/WEBSITE-BUILD-PLAN.md §3.1.
+--------------------------------------------------------------------------- */
+@theme {
+  --color-ink-950: #0b0e1c;
+  --color-ink-900: #12162b;
+  --color-ink-800: #1a1f3a;
+  --color-ink-700: #232848;
+  --color-ink-600: #2a2f55;
+  --color-ink-500: #3b4272;
+  --color-ink-400: #5a6199;
+  --color-ink-300: #8e93bc;
+  --color-ink-200: #c3c6dd;
+  --color-ink-100: #e8e9f2;
+
+  --color-gold-700: #7a6e32;
+  --color-gold-600: #9a8b45;
+  --color-gold-500: #b8a95d;
+  --color-gold-400: #cdbf7c;
+  --color-gold-300: #ded4a2;
+  --color-gold-200: #ede6c7;
+  --color-gold-100: #f7f3e4;
+
+  /* Division accents — reserved for division cards and project badges. */
+  --color-div-sw: #4fa3d1;
+  --color-div-ae: #e07a4a;
+  --color-div-mt: #7fb069;
+  --color-div-bt: #4fbf9f;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-grotesk), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-jbmono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --ease-brand: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+--------------------------------------------------------------------------- */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--color-ink-950);
+  color: var(--color-ink-100);
+  font-family: var(--font-sans);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ---------------------------------------------------------------------------
+   Hero — circuit traces drawing themselves
+--------------------------------------------------------------------------- */
+.trace {
+  stroke-dasharray: 1400;
+  stroke-dashoffset: 1400;
+  animation: trace-draw 3.2s var(--ease-brand) forwards;
+  animation-delay: var(--intro-delay, 0ms);
+}
+.trace-2 {
+  animation-delay: calc(var(--intro-delay, 0ms) + 0.35s);
+}
+.trace-3 {
+  animation-delay: calc(var(--intro-delay, 0ms) + 0.7s);
+}
+@keyframes trace-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.node {
+  opacity: 0;
+  animation: node-pop 0.6s var(--ease-brand) calc(var(--intro-delay, 0ms) + 2.4s) forwards;
+}
+@keyframes node-pop {
+  to {
+    opacity: 0.85;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Hero — 3D scene
+   `perspective` on the section, `preserve-3d` on the inner, and translateZ
+   depths on the background layers (set inline in Hero.tsx). HeroTilt rotates
+   the inner; because those layers sit at different Z they shift by different
+   amounts, so the result reads as depth rather than a uniform skew.
+
+   The section's own padding moved onto the inner, so `inset: 0` still leaves
+   the full-bleed layers edge to edge.
+--------------------------------------------------------------------------- */
+.hero-scene {
+  perspective: 1500px;
+  perspective-origin: 50% 45%;
+}
+
+.hero-scene__inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 120px 0 80px;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg));
+  transform-origin: center;
+  /* Deliberately NO `will-change: transform` here. Layer promotion can force
+     `transform-style: preserve-3d` to compute to `flat` in some browsers,
+     which would silently collapse the translateZ depths on the layers below
+     and leave a flat hero. The tilt is lerped and low-frequency; the browser
+     promotes during the transform on its own. */
+}
+
+/* ---------------------------------------------------------------------------
+   Hero — rotating wireframe cube
+   Six transparent faces with gold borders. Opposite faces share edges, so this
+   renders as a clean 12-edge wireframe rather than six squares. Pure CSS: no
+   JS, and it still turns with JavaScript disabled.
+--------------------------------------------------------------------------- */
+.hero-cube {
+  --cube: clamp(150px, 17vw, 240px);
+  position: absolute;
+  right: 7%;
+  top: 50%;
+  translate: 0 -50%;
+  width: var(--cube);
+  height: var(--cube);
+  perspective: 900px;
+  pointer-events: none;
+  z-index: 1;
+  display: none;
+}
+@media (min-width: 1024px) {
+  .hero-cube {
+    display: block;
+  }
+}
+
+.hero-cube__body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  /* Base angle matters: it is what shows when the animation is switched off
+     under `prefers-reduced-motion`. Without it the six faces would collapse
+     to a flat square. */
+  transform: rotateX(-20deg) rotateY(24deg);
+  animation: cube-spin 28s linear infinite;
+}
+
+.hero-cube__face {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(184, 169, 93, 0.5);
+  background: rgba(184, 169, 93, 0.035);
+  box-shadow: inset 0 0 26px rgba(184, 169, 93, 0.1);
+}
+
+.hero-cube__face--front {
+  transform: translateZ(calc(var(--cube) / 2));
+}
+.hero-cube__face--back {
+  transform: rotateY(180deg) translateZ(calc(var(--cube) / 2));
+}
+.hero-cube__face--right {
+  transform: rotateY(90deg) translateZ(calc(var(--cube) / 2));
+}
+.hero-cube__face--left {
+  transform: rotateY(-90deg) translateZ(calc(var(--cube) / 2));
+}
+.hero-cube__face--top {
+  transform: rotateX(90deg) translateZ(calc(var(--cube) / 2));
+}
+.hero-cube__face--bottom {
+  transform: rotateX(-90deg) translateZ(calc(var(--cube) / 2));
+}
+
+.hero-cube__core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: var(--color-gold-300);
+  box-shadow: 0 0 18px 4px rgba(184, 169, 93, 0.45);
+}
+
+@keyframes cube-spin {
+  from {
+    transform: rotateX(-20deg) rotateY(0deg);
+  }
+  to {
+    transform: rotateX(-20deg) rotateY(360deg);
+  }
+}
+/* ---------------------------------------------------------------------------
+   Nav machine — the exploded gear cluster (home page)
+
+   A real CSS 3D context, not an isometric drawing: `perspective` on the scene,
+   `preserve-3d` on the stage, and the pose driven by `--pitch` / `--yaw`. The
+   browser does the projection and the depth sorting, so orbiting is a genuine
+   change of viewing angle.
+
+   Five different sections on one shaft, stepped down from a wide flange to a
+   small pinion. The gaps between them are the exploded view; the shared module
+   and the single shaft are what make it read as one barrel rather than five
+   unrelated discs. See components/sections/NavMachine.tsx.
+
+   THE CONSTRAINT, and the thing that will break first: nothing on the stage may
+   carry `opacity` below 1, or `filter`, `mask`, or a `will-change` of a grouping
+   property. Any of them forces `transform-style` to compute to `flat`, and the
+   stack loses both its barrels and its depth ordering. That is why the sections
+   scale in rather than fade in — see MachineStage.tsx — and why the only fade is
+   on the ground plane, a leaf with nothing of its own to flatten.
+
+   Sizes that come from lib/machine.ts arrive as `--size` / `--z` / `--face` /
+   `--period` custom properties rather than being repeated here, so the geometry
+   has one home.
+--------------------------------------------------------------------------- */
+.machine {
+  position: relative;
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.machine__scene {
+  position: relative;
+  width: 100%;
+  /* The stack is ~530px tall; the clamp keeps it from being crushed on a short
+    viewport, where the section would otherwise clip its own machine. */
+  height: clamp(600px, 78svh, 760px);
+  /* lib/machine.ts: PERSPECTIVE, VIEW_X / VIEW_Y */
+  perspective: 4000px;
+  perspective-origin: 50% 72%;
+  cursor: grab;
+  touch-action: pan-y;
+}
+.machine__scene:active {
+  cursor: grabbing;
+}
+
+/* A 0×0 point on the assembly origin. Every section sits on the axis, so this is
+   the only anchor the scene needs — and it is also the vanishing point, which is
+   what keeps the projection maths in MachineOrbit.tsx short. */
+.machine__stage {
+  position: absolute;
+  /* lib/machine.ts: ORIGIN_X / ORIGIN_Y */
+  left: 50%;
+  top: 72%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--pitch, 52deg)) rotateZ(var(--yaw, -34deg));
+}
+
+/* The floor: a flat plane tilted into place. Same move the anime.js site makes
+   on its SVG tracks demo — a flat surface plus `perspective` reads as receding
+   ground, with no WebGL. */
+.machine__ground {
+  position: absolute;
+  left: -900px;
+  top: -900px;
+  width: 1800px;
+  height: 1800px;
+  transform: translateZ(-110px);
+  background-image:
+    linear-gradient(to right, rgba(184, 169, 93, 0.2) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(184, 169, 93, 0.2) 1px, transparent 1px);
+  background-size: 60px 60px;
+  -webkit-mask-image: radial-gradient(circle at center, #000 0%, #000 22%, transparent 50%);
+  mask-image: radial-gradient(circle at center, #000 0%, #000 22%, transparent 50%);
+}
+
+/* The shaft every section is threaded on. Two ribbons at right angles, each
+   tilted into a vertical plane: one alone would read as a flat edge and vanish
+   when the orbit puts it edge-on; two cross and read as a rod from any angle.
+   It is the single strongest cue that the sections belong together. */
+.machine__shaft {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+.machine__shaft::before,
+.machine__shaft::after {
+  content: "";
+  position: absolute;
+  transform-origin: top left;
+}
+
+.machine__shaft::before {
+  left: -4.5px;
+  top: 0;
+  width: 9px;
+  /* lib/machine.ts: SHAFT_HEIGHT / SHAFT_Z, inline on the element. */
+  height: var(--shaft-h, 514px);
+  background: linear-gradient(
+    to bottom,
+    rgba(205, 191, 124, 0.16) 0%,
+    rgba(205, 191, 124, 0.6) 10%,
+    rgba(205, 191, 124, 0.6) 88%,
+    rgba(205, 191, 124, 0.14) 100%
+  );
+  transform: translateZ(var(--shaft-z, -46px)) rotateX(90deg);
+}
+.machine__shaft::after {
+  left: 0;
+  top: -4.5px;
+  width: var(--shaft-h, 514px);
+  height: 9px;
+  background: linear-gradient(
+    to right,
+    rgba(205, 191, 124, 0.16) 0%,
+    rgba(205, 191, 124, 0.6) 10%,
+    rgba(205, 191, 124, 0.6) 88%,
+    rgba(205, 191, 124, 0.14) 100%
+  );
+  transform: translateZ(var(--shaft-z, -46px)) rotateY(-90deg);
+}
+
+/* --- one section of the barrel --- */
+
+.machine__section {
+  --unit-stroke: rgba(205, 191, 124, 0.92);
+  position: absolute;
+  left: calc(var(--size) / -2);
+  top: calc(var(--size) / -2);
+  width: var(--size);
+  height: var(--size);
+  transform-style: preserve-3d;
+  transform: translate3d(0px, 0px, var(--z, 0px));
+}
+
+/* The two caps of the barrel, sitting exactly on its ends. `--face` is half the
+   section's height, set inline from lib/machine.ts so the caps and the wall can
+   never disagree. The lower cap is dimmed: it is only ever visible as a sliver
+   of rim at the front, which is what tells the eye the section has a bottom. */
+/* `--fr` is this cap's radius over the section's largest radius, so one piece of
+   art serves both ends of a tapered section. Centring uses the `translate`
+   property rather than `transform`, so it cannot fight the z placement below. */
+.section__face {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--size) * var(--fr, 1));
+  height: calc(var(--size) * var(--fr, 1));
+  translate: -50% -50%;
+}
+
+.section__face--top {
+  transform: translateZ(var(--face, 15px));
+}
+
+.section__face--bottom {
+  transform: translateZ(calc(var(--face, 15px) * -1));
+  opacity: 0.42;
+}
+
+/* The turning is a CSS keyframe rather than an anime.js tween: it never stops, so
+   the compositor should own it. Every section turns the *same* way — this is a
+   cluster on one layshaft, where each gear meshes with a mate on a single
+   parallel shaft, so the period is proportional to the tooth count and nothing is
+   reversed. Get that wrong and it reads as a planetary set instead. */
+.section__svg {
+  width: 100%;
+  height: 100%;
+  transform-origin: center;
+  animation: gear-spin var(--period, 30s) linear infinite;
+}
+
+@keyframes gear-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Opaque, and — this is the part that is easy to get wrong — **lighter than the
+   page background**. Painting a part the same colour as the backdrop makes it
+   invisible no matter how solid it is geometrically: the machine collapses into
+   a set of floating outlines. These are the site's own navy ramp, stepped up
+   from `--color-ink-950`, so the parts read as stock catching light.
+   The fill is a shared radial gradient (defined once in NavMachine.tsx) with
+   the highlight off-centre toward the light — turned metal, not a flat plate.
+   The fallback colour after the url() is the old flat fill. */
+.section__body,
+.section__fill {
+  fill: url(#machine-cap-sheen) rgb(44, 50, 92);
+  stroke: var(--unit-stroke);
+  stroke-width: 1.25;
+  stroke-linejoin: round;
+}
+
+.section__fill {
+  stroke: none;
+}
+
+.section__line {
+  fill: none;
+  stroke: var(--unit-stroke);
+  stroke-width: 1;
+  opacity: 0.6;
+}
+
+.section__line--faint {
+  opacity: 0.3;
+}
+
+/* --- barrels ---
+   One panel of a cylinder wall. `segments` of these arranged around the axis form
+   the opaque barrel that turns a disc into a machine part — see the Barrel
+   comment in NavMachine.tsx. Each is a rectangle tilted upright by the trailing
+   rotateX(90deg): width runs tangentially, height runs up the axis, normal points
+   radially out. */
+.cylinder__panel {
+  position: absolute;
+  /* Centred on the *section's* centre, not on its corner. `left: -w/2` would
+     resolve against the section box — which is itself offset by `-size/2` — so
+     every panel would orbit a point half a section away from the axis and the
+     barrel would fan out into a peacock tail. The `50%` is what puts the
+     transform-origin, and therefore the rotation, on the assembly axis. */
+  left: calc(50% - var(--w) / 2);
+  top: calc(50% - var(--h) / 2);
+  width: var(--w);
+  height: var(--h);
+  transform-origin: center;
+  /* Read right to left. `rotateX(90deg)` stands the panel up, putting its height
+     along z; `rotateZ(90deg)` then turns its *width* to run tangentially, which
+     is what makes this a wall instead of a radial blade. `rotateY(--lean)` tilts
+     it so a tapered section's barrel runs from rBottom to rTop rather than
+     sitting at the mean radius, and the last two place it. */
+  transform: rotateZ(var(--a)) translateX(var(--r)) rotateY(var(--lean, 0deg))
+    rotateZ(90deg) rotateX(90deg);
+  /* The wall carries the scene's lighting. NavMachine.tsx bakes three colours
+     into each panel from its angle around the barrel (light from LIGHT_ANGLE in
+     lib/machine.ts): a shadowed bottom, a lit body, and a narrow gold rim at
+     the very top — the bright line where the wall meets the cap, which is the
+     cue that gives a turned part its thickness. The element's bottom edge maps
+     to the top of the stack after rotateX(90deg), so the rim is the last stop.
+     The fallbacks are the old flat colour, so a panel never renders unpainted. */
+  background: linear-gradient(
+    to bottom,
+    var(--c-lo, rgb(20, 24, 46)) 0%,
+    var(--c-hi, rgb(34, 40, 74)) 72%,
+    var(--c-rim, rgb(58, 62, 96)) 100%
+  );
+  /* Deliberately NOT `backface-visibility: hidden`. On a tapered section the
+     lean tilts every normal by the taper angle, which pushes the cull boundary
+     round to ~104° of the barrel — a whole wedge of wall disappears and the
+     silhouette goes to sawteeth. The barrel is closed and opaque, so the far
+     side is occluded by the near side anyway; culling buys nothing and costs
+     that. */
+  backface-visibility: visible;
+}
+
+/* A prism's faces need edges or the barrel reads as a bad cylinder. Only the
+   low-segment sections get this — on a 40-sided barrel the same hairlines would
+   turn the wall into a mesh. */
+.machine__section[data-facets] .cylinder__panel {
+  box-shadow: inset 0 0 0 1px rgba(184, 169, 93, 0.08);
+}
+
+/* Hovering a label lights its section. `:has()` keeps this CSS-only — no JS hover
+   handler, and it works before hydration. */
+.machine:has(.machine__link[data-hotspot="about"]:is(:hover, :focus-visible))
+  [data-unit="about"],
+.machine:has(.machine__link[data-hotspot="programs"]:is(:hover, :focus-visible))
+  [data-unit="programs"],
+.machine:has(.machine__link[data-hotspot="divisions"]:is(:hover, :focus-visible))
+  [data-unit="divisions"],
+.machine:has(.machine__link[data-hotspot="projects"]:is(:hover, :focus-visible))
+  [data-unit="projects"],
+.machine:has(.machine__link[data-hotspot="join"]:is(:hover, :focus-visible))
+  [data-unit="join"] {
+  --unit-stroke: #fff;
+}
+
+/* --- labels --- */
+
+/* Leader lines from each section to its label, with a marker dot at the section
+   end — the annotation convention an exploded drawing uses. MachineOrbit.tsx
+   rewrites the coordinates every frame; this only styles them. They sit under the
+   labels so a line can never run across the text. */
+.machine__leaders {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.machine__leader {
+  stroke: rgba(184, 169, 93, 0.42);
+  stroke-width: 1;
+  stroke-dasharray: 2 5;
+}
+
+.machine__leader-dot {
+  fill: var(--color-gold-500);
+}
+
+/* The labels are flat HTML above the scene, never part of the 3D context — text
+   tilted into an isometric plane is unreadable, and these are the real
+   navigation. MachineOrbit.tsx puts them in two columns at each section's own
+   height, which is the only arrangement that cannot collide on a vertical stack. */
+.machine__hotspots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.machine__hotspot {
+  position: absolute;
+  width: 190px;
+  translate: -50% -50%;
+  pointer-events: auto;
+}
+
+.machine__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  text-align: center;
+  transition:
+    border-color 0.3s var(--ease-brand),
+    background-color 0.3s var(--ease-brand);
+}
+.machine__link:hover,
+.machine__link:focus-visible {
+  border-color: rgba(184, 169, 93, 0.45);
+  background: rgba(26, 31, 58, 0.82);
+}
+
+.machine__link-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.machine__index {
+  font-family: var(--font-jbmono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: rgba(205, 191, 124, 0.75);
+}
+
+.machine__dot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-gold-500);
+  transition: box-shadow 0.3s var(--ease-brand);
+}
+.machine__link:hover .machine__dot,
+.machine__link:focus-visible .machine__dot {
+  box-shadow: 0 0 12px 3px rgba(184, 169, 93, 0.55);
+}
+
+/* Below `lg` a barrel is unreadable at phone width, so the scene goes away
+   entirely and the labels become a plain list. Shrinking the stack to 340px would
+   be noise, not navigation. */
+@media (max-width: 1023px) {
+  .machine__scene,
+  .machine__leaders {
+    display: none;
+  }
+  .machine__hotspots {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: auto;
+  }
+  .machine__hotspot {
+    position: static;
+    width: 100%;
+    translate: none;
+  }
+  .machine__link {
+    align-items: start;
+    text-align: left;
+    border-color: rgba(184, 169, 93, 0.16);
+    padding: 16px 18px;
+  }
+  .machine__link-head {
+    gap: 10px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Hero — staggered copy entrance
+--------------------------------------------------------------------------- */
+.hero-stagger {
+  opacity: 0;
+  transform: translateY(22px);
+  /* `--d` is the per-element offset, set inline in Hero.tsx. */
+  animation: rise 0.9s var(--ease-brand) forwards;
+  animation-delay: calc(var(--d, 0ms) + var(--intro-delay, 0ms));
+}
+@keyframes rise {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Hero — split headline (components/motion/SplitHeadline.tsx)
+   Words stay unbreakable; characters stagger in via the --i custom property.
+--------------------------------------------------------------------------- */
+.split-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+.split-char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.42em);
+  animation: split-rise 0.75s var(--ease-brand) forwards;
+  animation-delay: calc(var(--i) * 16ms + 200ms + var(--intro-delay, 0ms));
+}
+@keyframes split-rise {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Text shimmer (React Bits "Shiny Text")
+   An animated gradient clipped to the text. Used on the hero eyebrow and the
+   About kicker. The flat-gold rule outside the @supports block is the fallback,
+   so the label can never render invisible.
+--------------------------------------------------------------------------- */
+.text-shimmer {
+  color: var(--color-gold-500);
+}
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .text-shimmer {
+    background-image: linear-gradient(
+      100deg,
+      var(--color-gold-500) 0%,
+      var(--color-gold-500) 42%,
+      #f7f3e4 50%,
+      var(--color-gold-500) 58%,
+      var(--color-gold-500) 100%
+    );
+    background-size: 260% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: text-shimmer 5.5s linear calc(2s + var(--intro-delay, 0ms)) infinite;
+  }
+}
+@keyframes text-shimmer {
+  from {
+    background-position: 160% 0;
+  }
+  to {
+    background-position: -60% 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Hero — CTA spotlight (React Bits "Spotlight Card")
+   --mx / --my are set by components/motion/Spotlight.tsx.
+--------------------------------------------------------------------------- */
+.spotlight {
+  --glow: rgba(255, 255, 255, 0.3);
+  position: relative;
+  display: inline-flex;
+  border-radius: 0.5rem;
+}
+.spotlight--gold {
+  --glow: rgba(184, 169, 93, 0.42);
+}
+.spotlight::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-brand);
+  background: radial-gradient(
+    circle 110px at var(--mx, 50%) var(--my, 50%),
+    var(--glow),
+    transparent 70%
+  );
+}
+.spotlight:hover::after {
+  opacity: 1;
+}
+
+/* ---------------------------------------------------------------------------
+   Scroll reveal — driven by components/motion/Reveal.tsx
+   Children start hidden, so app/[locale]/layout.tsx carries a <noscript> rule
+   that forces them visible when JavaScript is off.
+--------------------------------------------------------------------------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.75s var(--ease-brand),
+    transform 0.75s var(--ease-brand);
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Hero — mark watermark
+--------------------------------------------------------------------------- */
+.hero-mark {
+  position: absolute;
+  right: -30px;
+  top: 50%;
+  /* `translate` is a separate property from `transform`, so the scroll parallax
+     can drive `transform` without fighting this centring offset. */
+  translate: 0 -50%;
+  width: min(42vw, 400px);
+  aspect-ratio: 200 / 184;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.1;
+  background: url("/logo/logo-mark-light.png") no-repeat center / contain;
+  animation: mark-drift 13s ease-in-out infinite alternate;
+}
+@keyframes mark-drift {
+  from {
+    translate: 0 calc(-50% - 14px);
+  }
+  to {
+    translate: 0 calc(-50% + 14px);
+  }
+}
+@media (max-width: 900px) {
+  .hero-mark {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Hero — scroll indicator
+--------------------------------------------------------------------------- */
+.scroll-cue-line {
+  display: block;
+  width: 1px;
+  height: 38px;
+  background: linear-gradient(var(--color-gold-500), transparent);
+  animation: cue 2s var(--ease-brand) infinite;
+}
+@keyframes cue {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  50% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+  51% {
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Shared — drawing rules and hover lift
+   Used by the About objectives and the Programs cards.
+
+   `.draw-rule` is a hairline that draws in from the left when its Reveal
+   wrapper enters the viewport (`.reveal.is-in` is set by
+   components/motion/Reveal.tsx).
+
+   `.lift-item` lifts on hover; its surface is a `::before` expanded beyond the
+   item, so adding it does not shift text or change the grid.
+--------------------------------------------------------------------------- */
+.lift-item {
+  position: relative;
+  transition: transform 0.35s var(--ease-brand);
+}
+.lift-item::before {
+  content: "";
+  position: absolute;
+  inset: -14px -16px;
+  border-radius: 10px;
+  background-color: rgba(26, 31, 58, 0.7);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s var(--ease-brand);
+}
+.lift-item:hover {
+  transform: translateY(-4px);
+}
+.lift-item:hover::before {
+  opacity: 1;
+}
+
+.draw-rule {
+  display: block;
+  height: 1px;
+  /* Overridable so the Divisions section can tint each rule with its own
+     accent — see components/sections/Divisions.tsx. */
+  background-color: var(--rule, rgba(184, 169, 93, 0.18));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.8s var(--ease-brand);
+}
+.reveal.is-in .draw-rule {
+  transform: scaleX(1);
+}
+.lift-item:hover .draw-rule {
+  background-color: var(--rule-hover, rgba(184, 169, 93, 0.45));
+}
+
+.lift-index {
+  transition: color 0.3s var(--ease-brand);
+}
+.lift-item:hover .lift-index {
+  color: var(--color-gold-500);
+}
+
+/* ---------------------------------------------------------------------------
+   Intro — futuristic door opening
+   Rendered on the server so it is painted before hydration (a client-only
+   overlay would let the hero flash first). Pure CSS, no JS.
+
+   `--intro-delay` is the moment the hero is allowed to start animating. It is
+   set to 600 ms so the hero content rises *while* the doors are still parting,
+   rather than sitting frozen until they finish.
+--------------------------------------------------------------------------- */
+:root {
+  --intro-delay: 600ms;
+}
+
+/*
+ * Returning visitor, same tab. The class is set by an inline script in the
+ * layout during HTML parsing — see app/[locale]/layout.tsx. Must come after
+ * the `:root` rule above: same specificity, so source order decides.
+ *
+ * The hero delay drops to 0 as well, or it would sit waiting 600 ms for doors
+ * that never open.
+ */
+.intro-seen {
+  --intro-delay: 0ms;
+}
+.intro-seen .intro {
+  display: none;
+}
+
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  /* Decorative only. Never intercepts a click, so it cannot block the page
+     even during the second it is on screen. */
+  pointer-events: none;
+  animation: intro-hide 0s linear 1.1s forwards;
+}
+@keyframes intro-hide {
+  to {
+    visibility: hidden;
+  }
+}
+
+.intro__panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* Slight overlap so no hairline gap shows where the panels meet. */
+  width: 50.5%;
+  /* A touch lighter than the hero's flat ink-950, so the panels read as a
+     surface being slid away rather than dark-on-dark. */
+  background: linear-gradient(
+    to bottom,
+    var(--color-ink-900),
+    var(--color-ink-950) 70%
+  );
+  will-change: transform;
+}
+.intro__panel--left {
+  left: 0;
+  animation: door-left 0.65s cubic-bezier(0.85, 0, 0.15, 1) 0.3s forwards;
+}
+.intro__panel--right {
+  right: 0;
+  animation: door-right 0.65s cubic-bezier(0.85, 0, 0.15, 1) 0.3s forwards;
+}
+@keyframes door-left {
+  to {
+    transform: translate3d(-101%, 0, 0);
+  }
+}
+@keyframes door-right {
+  to {
+    transform: translate3d(101%, 0, 0);
+  }
+}
+
+/* Light spilling out of the seam onto each panel. */
+.intro__panel--left::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, transparent 68%, rgba(184, 169, 93, 0.12));
+}
+.intro__panel--right::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to left, transparent 68%, rgba(184, 169, 93, 0.12));
+}
+
+/* Scanline texture, for the panel-material read. */
+.intro__panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(184, 169, 93, 0.05) 0px,
+    rgba(184, 169, 93, 0.05) 1px,
+    transparent 1px,
+    transparent 5px
+  );
+}
+
+.intro__edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(
+    transparent,
+    var(--color-gold-500) 18%,
+    var(--color-gold-500) 82%,
+    transparent
+  );
+  box-shadow: 0 0 18px 2px rgba(184, 169, 93, 0.5);
+}
+.intro__panel--left .intro__edge {
+  right: 0;
+}
+.intro__panel--right .intro__edge {
+  left: 0;
+}
+
+/* The seam charges, then flares out as the panels release. */
+.intro__seam {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--color-gold-300);
+  box-shadow: 0 0 44px 10px rgba(184, 169, 93, 0.55);
+  opacity: 0;
+  animation: seam-charge 0.62s ease-in forwards;
+}
+@keyframes seam-charge {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.15);
+  }
+  55% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(1);
+  }
+}
+
+.intro__flash {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(247, 243, 228, 0.34),
+    transparent 46%
+  );
+  animation: intro-flash 0.55s ease-out 0.28s forwards;
+}
+@keyframes intro-flash {
+  0% {
+    opacity: 0;
+  }
+  14% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion — kill every transform animation, keep the end state
+--------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+  /* No intro at all, and the hero starts immediately rather than waiting for
+     doors that never open. */
+  :root {
+    --intro-delay: 0ms;
+  }
+  .intro {
+    display: none;
+  }
+  .hero-stagger {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  .split-char {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+  .trace {
+    stroke-dashoffset: 0;
+  }
+  .node {
+    opacity: 0.85;
+  }
+  /* The global rule above kills the animation, but the shimmer also needs its
+     transparent text colour reset or the label would disappear. */
+  .text-shimmer {
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    color: var(--color-gold-500);
+    animation: none;
+  }
+  .hero-mark {
+    translate: 0 -50%;
+    animation: none;
+  }
+  /* The cube keeps its base angle from `.hero-cube__body` and simply stops
+     turning. The 3D tilt is skipped in HeroTilt.tsx. */
+  .hero-cube__body {
+    animation: none;
+  }
+  /* The stack stops turning, and keeps its pose — the stepped silhouette is
+     layout, not motion, so the machine still reads as a barrel at rest. The
+     entrance and the idle bob are skipped in MachineStage.tsx and the turntable
+     in MachineOrbit.tsx, so no rule is needed for those: the plain CSS state
+     already *is* the settled one. */
+  .section__svg {
+    animation: none;
+  }
+  .spotlight::after {
+    display: none;
+  }
+}
