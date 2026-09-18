@@ -60,10 +60,13 @@ export const home = {
   },
 
   join: {
+    open: false,
     line: "Pendaftaran dibuka.",
+    lineClosed: "Pendaftaran ditutup.",
     focus:
       "Kami sedang mencari anggota untuk Divisi BioTech. Kalau kamu tertarik pada biologi, kesehatan, atau riset di laboratorium, di sinilah tempatnya.",
     deadlineLabel: "Tenggat",
+    closedLabel: "Ditutup pada",
     deadline: "Jumat, 18 September 2026, pukul 07.00",
     contactLabel: "Ada pertanyaan? Hubungi kami:",
     cta: "Buka formulir pendaftaran",

@@ -138,17 +138,31 @@ export interface ProjectsContent {
 }
 
 export interface JoinContent {
-  /** The single line the section carries. */
+  /**
+   * Whether registration is currently open.
+   *
+   * The single switch for the whole section. When `false`: the closed line is
+   * shown instead of the open one, the recruiting note is dropped, the form
+   * button is not rendered, and the date is relabelled as `closedLabel`. The
+   * contacts stay either way — "questions?" is still a useful thing to offer
+   * after the deadline.
+   */
+  open: boolean;
+  /** The single line the section carries, when open. */
   line: string;
-  /** What the club is short of — the one ask on the page. */
+  /** The single line when registration has closed. */
+  lineClosed: string;
+  /** What the club is short of — the one ask on the page. Open only. */
   focus: string;
-  /** Label of the closing date, e.g. "Deadline". */
+  /** Label of the closing date while it is still ahead, e.g. "Deadline". */
   deadlineLabel: string;
-  /** The closing date itself. */
+  /** Label once the date has passed, e.g. "Closed on". */
+  closedLabel: string;
+  /** The date itself. */
   deadline: string;
   /** Label above the contact list. */
   contactLabel: string;
-  /** Label of the button that opens the registration form. */
+  /** Label of the button that opens the registration form. Open only. */
   cta: string;
 }
 

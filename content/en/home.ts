@@ -60,10 +60,13 @@ export const home = {
   },
 
   join: {
+    open: false,
     line: "We are open.",
+    lineClosed: "Registration is closed.",
     focus:
       "We are especially looking for members for the BioTech division. If you are drawn to biology, health, or lab work, that is where we need you.",
     deadlineLabel: "Deadline",
+    closedLabel: "Closed on",
     deadline: "Friday 18 September 2026, 7:00 AM",
     contactLabel: "Questions? Get in touch:",
     cta: "Open the registration form",
